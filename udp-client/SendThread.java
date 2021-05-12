@@ -31,7 +31,7 @@ public class SendThread extends Thread {
 
         // Ввод имени клиента
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Представьтесь: ");  // По идее, эта строка идёт от сервера - нужен receive
+        /*System.out.println("Представьтесь: ");  // По идее, эта строка идёт от сервера - нужен receive
         String username = scanner.nextLine();
 
         // Отправка имени серверу
@@ -43,23 +43,26 @@ public class SendThread extends Thread {
         }
         catch (IOException exp) {
             exp.printStackTrace();
-        }
+        }*/
 
         // Формирование и отправка сообщений серверу
         while (!text.equals("Пока")) {
 
+            System.out.println("Отправка сообщений началась");
             text = scanner.nextLine();
             sendingDataBuffer = text.getBytes();
             packet = new DatagramPacket(sendingDataBuffer, sendingDataBuffer.length, ip, port);
 
             try {
                 socket.send(packet);
+                System.out.println("Отправлено");
             }
             catch (IOException exp) {
                 exp.printStackTrace();
             }
         }
 
+        System.out.println("Вы вышли из чата");
         socket.close();
     }
 }

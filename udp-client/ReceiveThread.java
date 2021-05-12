@@ -25,6 +25,7 @@ public class ReceiveThread extends Thread {
 
         while(true) {
 
+            System.out.println("Приём сообщений начался");
             // Принятие сообщений от сервера
             packet = new DatagramPacket(receivingDataBuffer, receivingDataBuffer.length);
             try {
@@ -37,6 +38,8 @@ public class ReceiveThread extends Thread {
             // Вывод сообщения на экран
             text = new String(packet.getData());
             System.out.println(text);
+
+            if (socket.isClosed()) break;
         }
     }
 }
