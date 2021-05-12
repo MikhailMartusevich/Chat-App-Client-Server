@@ -30,7 +30,6 @@ public class UDP_Server extends Thread  {
             if (recvData.equals("end")) {
                 System.out.println("Server ended");
                 running = false;
-                continue;
             }
         }
         socket.close();
