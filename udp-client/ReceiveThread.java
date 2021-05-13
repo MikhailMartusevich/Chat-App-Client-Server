@@ -1,5 +1,3 @@
-package com.company;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -16,7 +14,7 @@ public class ReceiveThread extends Thread {
 
     private DatagramPacket packet;
     private DatagramSocket socket;
-    private byte[] receivingDataBuffer = new byte[1024];
+    private byte[] receivingDataBuffer = new byte[256];
     private String text;
 
 
@@ -34,10 +32,11 @@ public class ReceiveThread extends Thread {
             catch(IOException exp) {
                 exp.printStackTrace();
             }
-
             // Вывод сообщения на экран
             text = new String(packet.getData());
             System.out.println(text);
+
+            receivingDataBuffer = new byte[256];
 
             if (socket.isClosed()) break;
         }

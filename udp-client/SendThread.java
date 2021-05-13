@@ -1,5 +1,3 @@
-package com.company;
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -22,16 +20,16 @@ public class SendThread extends Thread {
     private DatagramPacket packet;
     private DatagramSocket socket;
     private int port;
-    private byte[] sendingDataBuffer = new byte[1024];
-    String text = " ";
+    private byte[] sendingDataBuffer = new byte[256];
+    String text = "";
 
 
     // Тело потока
     public void run() {
 
-        // Ввод имени клиента
+        // Ввод имени клиеПонта
         Scanner scanner = new Scanner(System.in);
-        /*System.out.println("Представьтесь: ");  // По идее, эта строка идёт от сервера - нужен receive
+        /* System.out.println("Представьтесь: ");  // По идее, эта строка идёт от сервера - нужен receive
         String username = scanner.nextLine();
 
         // Отправка имени серверу
