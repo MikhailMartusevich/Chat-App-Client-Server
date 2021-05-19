@@ -26,12 +26,13 @@ public class UDP_Server {
     public final static int          SERVER_PORT = 8888;         // ServerSocket port
     private static DatagramSocket    SERVER_SOCKET;              // UDP socket
     private boolean isRunning;                                  // server status variable
+    private boolean loggedUser;
 
     private byte[]  RECEIVE_BUFFER  = new byte[256];  // receiving messages buffer
     private byte[]  SEND_BUFFER     = new byte[256];  // sending messages buffer
 
-    SERVER_COMMANDS commands = new SERVER_COMMANDS();
-    ArrayList<SERVER_USER> users = new ArrayList<>();
+    private final SERVER_COMMANDS commands = new SERVER_COMMANDS();
+    private ArrayList<SERVER_USER> users = new ArrayList<>();
 
 
     public UDP_Server() throws IOException {
@@ -39,6 +40,7 @@ public class UDP_Server {
     }
 
     public void Run() throws IOException {
+        loggedUser = false;
         isRunning = true;
         System.out.println("Server started");
         System.out.println("Waiting for a client message... ");
@@ -53,15 +55,24 @@ public class UDP_Server {
 
                 System.out.println(RECEIVED_PACKET.getAddress() + ": " + RECEIVED_DATA);
 
+                for (SERVER_USER user : users) // check IP address for logged user
+                    if (user.userAddress != null &&
+                            user.userAddress.equals(RECEIVED_PACKET.getAddress())) {
+                        loggedUser = true;
+                        break;
+                    }
 
-                /* Server received registration command (/reg)*/
 
-                if (RECEIVED_DATA.startsWith(commands.REG_USER)) { // if received register command
+                    /* Server received registration command (/reg)*/
+
+                if (RECEIVED_DATA.startsWith(commands.REG_USER) && !loggedUser) { // if received register command
                     RECEIVE_BUFFER = new byte[256]; //clearing for a new message
-
                     String[] command = RECEIVED_DATA.split(" ");
                     boolean exist = false;
                     InetAddress regAddress = RECEIVED_PACKET.getAddress(); // save address of client
+
+                    if (command.length != 2)
+                        continue;
 
                     String regUser = command[1];
 
@@ -74,10 +85,8 @@ public class UDP_Server {
                             SEND_BUFFER = error.getBytes();
                             SEND_PACKET = new DatagramPacket(SEND_BUFFER, SEND_BUFFER.length, RECEIVED_PACKET.getAddress(), SERVER_PORT);
                             SERVER_SOCKET.send(SEND_PACKET);
-
                             break;
                         }
-
                     if (!exist) {
                         users.add(new SERVER_USER(regUser, null, false)); // adding new client to user list
 
@@ -86,21 +95,23 @@ public class UDP_Server {
                         SEND_BUFFER = regMessage.getBytes();
                         SEND_PACKET = new DatagramPacket(SEND_BUFFER, SEND_BUFFER.length, RECEIVED_PACKET.getAddress(), SERVER_PORT);
                         SERVER_SOCKET.send(SEND_PACKET);
-
                         System.out.println(regMessage);
                     }
+
                     continue;
                 }
 
 
-                /* Server received login command (/login) */
+                    /* Server received login command (/login) */
 
-                else if (RECEIVED_DATA.startsWith(commands.LOG_USER)) {
+                else if (RECEIVED_DATA.startsWith(commands.LOG_USER) && !loggedUser) {
                     RECEIVE_BUFFER = new byte[256]; //clearing for a new message
-
                     boolean exist = false;
                     InetAddress loginAddress = RECEIVED_PACKET.getAddress();
-                    String[] command = RECEIVED_DATA.split(" ");
+                    String[] command = RECEIVED_DATA.split(" ",2);
+
+                    if (command.length != 2)
+                        continue;
 
                     String loginUser = command[1];
 
@@ -117,7 +128,6 @@ public class UDP_Server {
                                 break;
                             }
                         }
-
                         if (exist) {
                             user.userAddress = RECEIVED_PACKET.getAddress();
                             user.isOnline = true;
@@ -132,7 +142,6 @@ public class UDP_Server {
                             break;
                         }
                     }
-
                     if (!exist) {
                         // send error to client: user doesn't exists
                         String error = "Error: client with this username doesn't exists";
@@ -140,30 +149,35 @@ public class UDP_Server {
                         SEND_PACKET = new DatagramPacket(SEND_BUFFER, SEND_BUFFER.length, RECEIVED_PACKET.getAddress(), SERVER_PORT);
                         SERVER_SOCKET.send(SEND_PACKET);
                     }
+
                     continue;
                 }
 
-                /* Server received user logout command (/logout) */
 
-                else if (RECEIVED_DATA.equals(commands.LOGOUT_USER)) {
+                    /* Server received user logout command (/logout) */
+
+                else if (RECEIVED_DATA.equals(commands.LOGOUT_USER) && loggedUser) {
                     for (SERVER_USER user : users) {
                         if (user.userAddress != null &&
                                 user.userAddress.equals(RECEIVED_PACKET.getAddress())) {
                             user.userAddress = null;
                             user.isOnline = false;
-
                             String logoutMessage = "Logout success: " + user.userName;
+
                             SEND_BUFFER = logoutMessage.getBytes();
                             SEND_PACKET = new DatagramPacket(SEND_BUFFER, SEND_BUFFER.length, RECEIVED_PACKET.getAddress(), SERVER_PORT);
                             SERVER_SOCKET.send(SEND_PACKET);
+
                             System.out.println("User logged out: " + user.userName);
                             break;
                         }
                     }
+
                     continue;
                 }
 
-                /* Server received end of work command (/end) */
+
+                    /* Server received end of work command (/end) */
 
                 else if (RECEIVED_DATA.equals(commands.SERVER_END)) {
                     String endingMessage = "Server has ended.";
@@ -177,9 +191,9 @@ public class UDP_Server {
                             SERVER_SOCKET.send(SEND_PACKET);
                         }
                     }
-
                     isRunning = false;
                 }
+
 
                 /* Server received user's message */
 
@@ -187,7 +201,8 @@ public class UDP_Server {
                     String message = "not_initialized";
 
                     for (SERVER_USER user : users) {
-                        if (user.userAddress.equals(RECEIVED_PACKET.getAddress()) && user.isOnline) {
+                        if (user.userAddress != null &&
+                                user.userAddress.equals(RECEIVED_PACKET.getAddress()) && user.isOnline) {
                             message = user.userName + ": " + RECEIVED_DATA;
                             SEND_BUFFER = message.getBytes();
                             break;
@@ -195,6 +210,8 @@ public class UDP_Server {
                     }
 
                     if (message.equals("not_initialized")) {
+                        System.out.println("Message from unknown user: " + RECEIVED_PACKET.getAddress());
+
                         //send error to client
                         String error = "Error: please log in or register";
                         SEND_BUFFER = error.getBytes();
@@ -203,11 +220,10 @@ public class UDP_Server {
                         continue;
                     }
 
-                    //System.out.println("Received from client: " + RECEIVED_DATA);
-
                     // send message to all users except sender
                     for (SERVER_USER user : users) {
-                        if (!user.userAddress.equals(RECEIVED_PACKET.getAddress()) && user.isOnline) {
+                        if (user.userAddress != null &&
+                                !user.userAddress.equals(RECEIVED_PACKET.getAddress()) && user.isOnline) {
                             SEND_PACKET = new DatagramPacket(SEND_BUFFER, SEND_BUFFER.length, user.userAddress, SERVER_PORT);
                             SERVER_SOCKET.send(SEND_PACKET);
                         }
@@ -215,11 +231,11 @@ public class UDP_Server {
                 }
 
                 // clearing all buffers for receiving and sending new messages
-
                 SEND_BUFFER = new byte[256];
                 RECEIVE_BUFFER = new byte[256];
             }
-        SERVER_SOCKET.close();
+
+        SERVER_SOCKET.close(); // close socket after failing the condition
     }
 
     public static void main(String[] args) {
