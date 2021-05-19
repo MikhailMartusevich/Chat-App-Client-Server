@@ -32,16 +32,16 @@ public class UDP_Server {
     private boolean                  isRunning;                  // server status variable
     private boolean                  loggedUser;                 // client status
 
-    private byte[]  RECEIVE_BUFFER  = new byte[256];             // receiving messages buffer
-    private byte[]  SEND_BUFFER     = new byte[256];             // sending messages buffer
+    private byte[]                   RECEIVE_BUFFER;             // receiving messages buffer
+    private byte[]                   SEND_BUFFER;                // sending messages buffer
 
-    DatagramPacket  RECEIVED_PACKET;
-    DatagramPacket  SEND_PACKET;
+    DatagramPacket                   RECEIVED_PACKET;
+    DatagramPacket                   SEND_PACKET;
 
-    String          RECEIVED_DATA;
+    String                           RECEIVED_DATA;
 
-    private final SERVER_COMMANDS commands = new SERVER_COMMANDS();
-    private ArrayList<SERVER_USER> users = new ArrayList<>();
+    private final SERVER_COMMANDS    commands = new SERVER_COMMANDS();
+    private ArrayList<SERVER_USER>   users = new ArrayList<>();
 
     private void register_user() throws IOException {
         RECEIVE_BUFFER = new byte[256]; //clearing for a new message
@@ -187,7 +187,6 @@ public class UDP_Server {
         }
     }
     private void receive_message() throws IOException {
-        loggedUser = false;
 
         RECEIVED_PACKET = new DatagramPacket(RECEIVE_BUFFER, RECEIVE_BUFFER.length); // UDP receiving packet
 
@@ -214,6 +213,7 @@ public class UDP_Server {
                 // clearing all buffers for receiving and sending new messages
                 SEND_BUFFER = new byte[256];
                 RECEIVE_BUFFER = new byte[256];
+                loggedUser = false;
 
                 receive_message();
 
