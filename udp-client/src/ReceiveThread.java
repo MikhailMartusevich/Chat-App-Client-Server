@@ -44,12 +44,14 @@ public class ReceiveThread extends Thread {
             if(text.startsWith("Logout")) {
                 socket.close();
                 System.out.println("Принятие сообщений завершилось");
-                System.out.println("Вы вышли из чата");
                 this.interrupt();
+                break;
             }
 
             System.out.println(text);
             receivingDataBuffer = new byte[1024];
         }
+
+        System.out.println("Вы вышли из чата");
     }
 }

@@ -11,7 +11,7 @@ public class Main {
         try {
             // Создание сокета и определение IP адреса сервера
             DatagramSocket socket = new DatagramSocket(port);
-            InetAddress ip = InetAddress.getByName("84.53.223.234");
+            InetAddress ip = InetAddress.getLocalHost();
 
             new SendThread(socket, port, ip).start();
             new ReceiveThread(socket).start();

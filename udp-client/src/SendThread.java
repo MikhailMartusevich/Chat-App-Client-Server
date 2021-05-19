@@ -34,7 +34,7 @@ public class SendThread extends Thread {
         Scanner scanner = new Scanner(System.in);
 
         // Формирование и отправка сообщений серверу
-        while (!text.equals("Bye")) {
+        while (!text.equals("/logout")) {
 
             text = scanner.nextLine();
             sendingDataBuffer = text.getBytes();
@@ -49,7 +49,7 @@ public class SendThread extends Thread {
             sendingDataBuffer = new byte[1024];
         }
 
-        // Завершение потока после отправки "Bye"
+        // Завершение потока после отправки "Logout"
         this.interrupt();
         System.out.println("Отправка сообщений завершена");
     }
