@@ -49,6 +49,7 @@ public class ReceiveThread extends Thread {
             }
 
             System.out.println(text);
+            receivingDataBuffer = new byte[1024];
         }
     }
 }

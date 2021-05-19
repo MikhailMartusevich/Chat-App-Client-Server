@@ -45,6 +45,8 @@ public class SendThread extends Thread {
             } catch (IOException exp) {
                 exp.printStackTrace();
             }
+
+            sendingDataBuffer = new byte[1024];
         }
 
         // Завершение потока после отправки "Bye"
