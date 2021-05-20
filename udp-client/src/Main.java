@@ -1,3 +1,5 @@
+package com.company;
+
 import java.net.*;
 
 public class Main {
@@ -9,21 +11,23 @@ public class Main {
         try {
             // Создание сокета и определение IP адреса сервера
             DatagramSocket socket = new DatagramSocket(port);
-            InetAddress ip = InetAddress.
-                    getLocalHost();
+            InetAddress ip = InetAddress.getLocalHost();
                     //getByName(args[0]);
 
+            // Создание потока для отправки сообщений
             Thread send_thread = new SendThread(socket, port, ip);
-                send_thread.start();
+            send_thread.start();
 
+            // Создание потока для принятия сообщений
             Thread recv_thread = new ReceiveThread(socket);
-                recv_thread.start();
+            recv_thread.start();
 
-                // Ожидание закрытия потока отправления
-                while(!send_thread.isInterrupted()) {}
-                recv_thread.interrupt(); // закрытие потока принятия
+            // Ожидание закрытия потока отправления
+            while(!send_thread.isInterrupted()) {}
+            recv_thread.interrupt(); // Закрытие потока принятия
 
-            System.out.println("All threads are interrupted");
+            System.out.println("Принятие сообщений завершено");
+            System.out.println("Все потоки завершены");
         }
         catch (Exception exp) {
             exp.printStackTrace();

@@ -1,3 +1,5 @@
+package com.company;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -45,10 +47,10 @@ public class ReceiveThread extends Thread {
             // Вывод сообщения на экран
             text = new String(packet.getData());
 
-            // Завершение потока при входящем сообщении "Logout"
+            // Завершение потока при входящем сообщении "Server has ended"
             if(text.startsWith("Server has ended.")) {
 //                socket.close();
-                System.out.println("Принятие сообщений завершилось");
+                System.out.println("Принятие сообщений завершено");
                 System.out.println("Вы вышли из чата");
                 this.interrupt();
             }
