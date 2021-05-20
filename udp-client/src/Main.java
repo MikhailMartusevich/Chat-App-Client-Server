@@ -1,5 +1,3 @@
-package com.company;
-
 import java.net.*;
 
 public class Main {
@@ -11,18 +9,23 @@ public class Main {
         try {
             // Создание сокета и определение IP адреса сервера
             DatagramSocket socket = new DatagramSocket(port);
-            InetAddress ip = InetAddress.getLocalHost();
+            InetAddress ip = InetAddress.
+                    getLocalHost();
+                    //getByName(args[0]);
 
-            new SendThread(socket, port, ip).start();
-            new ReceiveThread(socket).start();
+            Thread send_thread = new SendThread(socket, port, ip);
+                send_thread.start();
+
+            Thread recv_thread = new ReceiveThread(socket);
+                recv_thread.start();
+
+                // Ожидание закрытия потока отправления
+                while(!send_thread.isInterrupted()) {}
+                recv_thread.interrupt(); // закрытие потока принятия
+
+            System.out.println("All threads are interrupted");
         }
-
-
-        catch (SocketException exp) {
-            exp.printStackTrace();
-        }
-
-        catch (UnknownHostException exp) {
+        catch (Exception exp) {
             exp.printStackTrace();
         }
     }
